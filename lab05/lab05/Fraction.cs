@@ -4,29 +4,23 @@
 	{
 		private int _numerator, _denominator;
 
-		public Fraction()
-		{
-			Numerator = 0;
-			Denominator = 1;
-		}
-
 		public Fraction(int numerator, int denominator)
 		{
 			this.Numerator = numerator;
 			this.Denominator = denominator;
-			//Console.WriteLine("Создана дробь: " + this.ToString());
+			this.Simplify(); // Сразу попробуем упростить дробь
+							 //Console.WriteLine("Создана дробь: " + this.ToString());
 		}
 
-		public Fraction(int number) // Дробь из целого числа
-		{
-			this.Numerator = number;
-			this.Denominator = 1;
-		}
+		public Fraction() : this(0, 1) { }
+
+		public Fraction(int number) : this(number, 1) { } // Дробь из целого числа
 
 		public Fraction(Fraction c) // Копировать Дробь
 		{
 			this.Numerator = c.Numerator;
 			this.Denominator = c.Denominator;
+			// Думаю, бедут разумнее не упрощать копированную дробь, чтобы они "полностью" соответствовали как и ожидается
 		}
 
 		public int Numerator
@@ -53,33 +47,40 @@
 
 		public Fraction Simplify() // Мутирует экземпляр. Возвращает Дробь вместо войда чтобы можно было реализовывать "цепочку вызовов методов"
 		{
-			if (Numerator < 0 && Denominator < 0)
+			if (Numerator == 0)
 			{
-				Numerator *= -1;
-				Denominator *= -1;
+				Denominator = 1;
 			}
-			bool doAnotherAteration = true;
-			while (doAnotherAteration)
+			else
 			{
-				double divider = 1.0; // Дабл потому что надо будет делить потом
-				bool canSimplify;
-				do
+				if (Numerator < 0 && Denominator < 0)
 				{
-					divider += 1.0;
-					canSimplify = Math.Abs(Numerator / divider) % 1 < 0.000001 && Math.Abs(Denominator / divider) % 1 < 0.000001; // Сравниваем с малым числом потому что дабл неточный тип
+					Numerator *= -1;
+					Denominator *= -1;
 				}
-				while (divider <= Numerator && divider <= Denominator && !canSimplify);
-				if (canSimplify)
+				bool doAnotherAteration = true;
+				while (doAnotherAteration)
 				{
-					Numerator /= (int)divider;
-					Denominator /= (int)divider;
-					// Console.WriteLine($"Упростили на {divider}");
-					// doAnotherIteration = true;
-				}
-				else
-				{
-					// Console.WriteLine($"Нельзя упростить на {divider}, заканчиваем");
-					doAnotherAteration = false;
+					double divider = 1.0; // "проверялка" - Дабл потому что надо будет делить потом
+					bool canSimplify;
+					do
+					{
+						divider += 1.0;
+						canSimplify = Math.Abs(Numerator / divider) % 1 < 0.000001 && Math.Abs(Denominator / divider) % 1 < 0.000001; // Сравниваем с малым числом потому что дабл неточный тип
+					}
+					while (divider <= Math.Abs(Numerator) && divider <= Math.Abs(Denominator) && !canSimplify);
+					if (canSimplify)
+					{
+						Numerator /= (int)divider;
+						Denominator /= (int)divider;
+						// Console.WriteLine($"Упростили на {divider}");
+						// doAnotherIteration = true;
+					}
+					else
+					{
+						// Console.WriteLine($"Нельзя упростить на {divider}, заканчиваем");
+						doAnotherAteration = false;
+					}
 				}
 			}
 			return this;
@@ -92,6 +93,10 @@
 
 		public Fraction Flip() // Перевернуть дробь
 		{
+			if (Numerator == 0)
+			{
+				throw new DivideByZeroException("Попытка перевернуть дробь, числитель которой равен нулю");
+			}
 			int temp = Numerator;
 			Numerator = Denominator;
 			Denominator = temp;
@@ -205,7 +210,7 @@
 			}
 			return a * b.Flipped();
 		}
-		
+
 		// Статические методы
 		public static Fraction AddFractions(Fraction a, Fraction b)
 		{

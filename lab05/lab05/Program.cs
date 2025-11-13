@@ -2,7 +2,7 @@
 {
 	internal class Program
 	{
-		static void Main()
+		public static void Main()
 		{
 			Console.WriteLine("Лабораторная работа 05. Выполнил студент 6104-020302D Круглов Данил\n");
 			int menuOption;
@@ -22,7 +22,14 @@
 				Console.Write("Упрощённая A: ");
 				a.Simplified().Print();
 				Console.Write("Перевернутая A: ");
-				a.Flipped().Print();
+				try
+				{
+					a.Flipped().Print();
+				}
+				catch (DivideByZeroException e)
+				{
+					Console.WriteLine("Нельзя выполнить операцию: " + e.Message);
+				}
 				Console.Write("A в виде double: ");
 				Console.WriteLine(a.ToDouble());
 				Console.WriteLine("### Использование переопределения операторов ###");
